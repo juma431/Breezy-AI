@@ -1,0 +1,112 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#10131c">
+<title>BREEZY AI</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#10131c;color:#f4f5fa;font-family:Arial,sans-serif}
+header{padding:18px;background:#191e2b;border-bottom:1px solid #303649;display:flex;align-items:center;gap:12px}
+.logo{background:#7667f5;color:white;padding:10px;border-radius:12px;font-weight:bold}
+header h2{margin:0;font-size:20px}
+header small{color:#9ca5bd}
+#status{margin-left:auto;color:#7be0b0;font-size:12px}
+main{max-width:760px;margin:auto;padding:18px}
+#messages{height:65vh;min-height:300px;overflow-y:auto;padding:12px 0}
+.msg{padding:13px 15px;margin:12px 0;border-radius:15px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}
+.user{background:#635bdf;margin-left:12%;border-bottom-right-radius:4px}
+.ai{background:#202637;margin-right:8%;border-bottom-left-radius:4px}
+.label{font-size:11px;color:#aeb7d0;margin-bottom:5px}
+#welcome{text-align:center;padding:45px 12px;color:#b7bfd3}
+#welcome h1{font-size:32px;color:#fff}
+#bar{display:flex;gap:9px;background:#1b2030;padding:10px;border:1px solid #394158;border-radius:18px}
+textarea{background:transparent;color:white;border:0;outline:none;resize:none;flex:1;font:16px Arial;min-width:0;max-height:120px;padding:10px}
+button{border:0;border-radius:12px;padding:12px;background:#7165ed;color:white;font-weight:bold;font-size:15px}
+button:disabled{opacity:.5}
+.tools{display:flex;justify-content:space-between;gap:8px;margin-top:12px;flex-wrap:wrap}
+.tools button{background:#242b3c;color:#dce2f4}
+.note{color:#929bb2;font-size:12px;line-height:1.6;margin-top:14px}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">B</div>
+<div><h2>BREEZY AI</h2><small>Your ideas, your space</small></div>
+<div id="status">Ready</div>
+</header>
+<main>
+<div id="messages">
+<div id="welcome"><h1>Hey, welcome!</h1><p>What would you like to explore today?</p><p>Ask a question or start a conversation.</p></div>
+</div>
+<div id="bar">
+<textarea id="input" rows="1" placeholder="Message BREEZY AI..."></textarea>
+<button id="send">Send</button>
+</div>
+<div class="tools">
+<button id="clear">New chat</button>
+<button id="save">Export chat</button>
+</div>
+<p class="note">BREEZY AI prototype · Your chat stays in this page until you clear it or leave. This version does not yet include an AI model.</p>
+</main>
+<script>
+const messages=document.getElementById('messages');
+const input=document.getElementById('input');
+const send=document.getElementById('send');
+const status=document.getElementById('status');
+let history=[];
+function addMessage(role,text){
+ const welcome=document.getElementById('welcome');
+ if(welcome)welcome.remove();
+ const wrap=document.createElement('div');
+ wrap.className='msg '+(role==='You'?'user':'ai');
+ const label=document.createElement('div');
+ label.className='label';
+ label.textContent=role;
+ const content=document.createElement('div');
+ content.textContent=text;
+ wrap.append(label,content);
+ messages.appendChild(wrap);
+ messages.scrollTop=messages.scrollHeight;
+}
+function reply(text){
+ const t=text.toLowerCase().trim();
+ if(/^(hi|hello|hey)\b/.test(t))return "Hello! Welcome to BREEZY AI. What would you like to talk about?";
+ if(t.includes('your name'))return "I'm BREEZY AI, your chat prototype.";
+ if(t.includes('who made you'))return "I'm a project you're building called BREEZY AI.";
+ if(t.includes('help'))return "I can demonstrate the chat interface, but I don't have a real language model connected yet.";
+ return "I received your message: \""+text+"\"\n\nI'm currently running in prototype mode, so I can't reason like a real AI model yet. Our next step is to connect a language model that can run locally on your phone.";
+}
+function chat(){
+ const text=input.value.trim();
+ if(!text)return;
+ history.push({role:'You',text});
+ addMessage('You',text);
+ input.value='';
+ status.textContent='Prototype';
+ const answer=reply(text);
+ history.push({role:'BREEZY AI',text:answer});
+ addMessage('BREEZY AI',answer);
+}
+send.addEventListener('click',chat);
+input.addEventListener('keydown',e=>{
+ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();chat()}
+});
+document.getElementById('clear').addEventListener('click',()=>{
+ history=[];
+ messages.innerHTML='<div id="welcome"><h1>Hey, welcome!</h1><p>What would you like to explore today?</p><p>Ask a question or start a conversation.</p></div>';
+ status.textContent='Ready';
+});
+document.getElementById('save').addEventListener('click',()=>{
+ const file=new Blob([history.map(m=>m.role+': '+m.text).join('\n\n')],{type:'text/plain'});
+ const url=URL.createObjectURL(file);
+ const a=document.createElement('a');
+ a.href=url;a.download='breezy-ai-chat.txt';a.click();
+ URL.revokeObjectURL(url);
+});
+</script>
+</body>
+  </html>
+  
